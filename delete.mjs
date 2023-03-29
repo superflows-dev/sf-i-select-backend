@@ -6,7 +6,7 @@ export const processDelete = async (event) => {
     
     console.log('event', event);
     
-    if(AUTH_ENABLE) {
+    //if(AUTH_ENABLE) {
     
         if((event["headers"]["Authorization"]) == null) {
             return {statusCode: 400, body: { result: false, error: "Malformed headers!"}};
@@ -39,7 +39,7 @@ export const processDelete = async (event) => {
             return {statusCode: 401, body: {result: false, error: "Unauthorized request!"}};
         }
         
-    }
+    //}
     
     var id = "";
     

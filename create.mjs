@@ -1,6 +1,7 @@
 import { TABLE, AUTH_ENABLE, AUTH_REGION, AUTH_API, AUTH_STAGE, ddbClient, ScanCommand, PutItemCommand } from "./globals.mjs";
 import { processAuthenticate } from './authenticate.mjs';
 import { newUuidV4 } from './newuuid.mjs';
+import { processAddLog } from './addlog.mjs';
 
 export const processCreate = async (event) => {
     
@@ -38,6 +39,8 @@ export const processCreate = async (event) => {
         if(!authResult.result || !authResult.admin) {
             return {statusCode: 401, body: {result: false, error: "Unauthorized request!"}};
         }
+
+        const userId = authResult.userId;
         
     //}
     var name = "";
@@ -46,11 +49,13 @@ export const processCreate = async (event) => {
         name = JSON.parse(event.body).name.trim();
     } catch (e) {
       const response = {statusCode: 400, body: { result: false, error: "Malformed body!"}};
+      processAddLog(userId, 'create', event, response, response.statusCode)
       return response;
     }
     
     if(name == null || name == "" || name.length < 3) {
       const response = {statusCode: 400, body: {result: false, error: "Name not valid!"}}
+      processAddLog(userId, 'create', event, response, response.statusCode)
       return response;
     }
     
@@ -94,6 +99,7 @@ export const processCreate = async (event) => {
     if(found) {
     
       const response = {statusCode: 409, body: {result: false, error: "Name already exists!"}}
+      processAddLog(userId, 'create', event, response, response.statusCode)
       return response;
     
     }
@@ -121,6 +127,7 @@ export const processCreate = async (event) => {
     
     
     const response = {statusCode: 200, body: {result: true}};
+    processAddLog(userId, 'create', event, response, response.statusCode)
     return response;
     
 

@@ -1,6 +1,7 @@
 import { TABLE, AUTH_ENABLE, AUTH_REGION, AUTH_API, AUTH_STAGE, ddbClient, ScanCommand, PutItemCommand, GetItemCommand, UpdateItemCommand, DeleteItemCommand } from "./globals.mjs";
 import { processAuthenticate } from './authenticate.mjs';
 import { newUuidV4 } from './newuuid.mjs';
+import { processAddLog } from './addlog.mjs';
 
 export const processDelete = async (event) => {
     
@@ -35,9 +36,11 @@ export const processDelete = async (event) => {
         
         const authResult = await processAuthenticate(event["headers"]["Authorization"]);
         
-        if(!authResult.result) {
+        if(!authResult.result || !authResult.admin) {
             return {statusCode: 401, body: {result: false, error: "Unauthorized request!"}};
         }
+
+        const userId = authResult.userId;
         
     //}
     
@@ -47,11 +50,13 @@ export const processDelete = async (event) => {
         id = JSON.parse(event.body).id.trim();
     } catch (e) {
       const response = {statusCode: 400, body: { result: false, error: "Malformed body!"}};
+      processAddLog(userId, 'delete', event, response, response.statusCode)
       return response;
     }
     
     if(id == null || id == "" || id.length < 3) {
       const response = {statusCode: 400, body: {result: false, error: "Id not valid!"}}
+      processAddLog(userId, 'delete', event, response, response.statusCode)
       return response;
     }
     
@@ -75,6 +80,7 @@ export const processDelete = async (event) => {
     
     if(resultGet.Item == null) {
         const response = {statusCode: 404, body: {result: false, error: "Record does not exist!"}}
+        processAddLog(userId, 'delete', event, response, response.statusCode)
         return response;
     }
     
@@ -98,6 +104,7 @@ export const processDelete = async (event) => {
     var resultDelete = await ddbDelete();
     
     const response = {statusCode: 200, body: {result: true}};
+    processAddLog(userId, 'delete', event, response, response.statusCode)
     return response;
     
 

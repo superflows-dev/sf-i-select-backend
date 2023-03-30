@@ -1,6 +1,7 @@
 import { TABLE, AUTH_ENABLE, AUTH_REGION, AUTH_API, AUTH_STAGE, ddbClient, ScanCommand, PutItemCommand, GetItemCommand, UpdateItemCommand } from "./globals.mjs";
 import { processAuthenticate } from './authenticate.mjs';
 import { newUuidV4 } from './newuuid.mjs';
+import { processAddLog } from './addlog.mjs';
 
 export const processUpdate = async (event) => {
     
@@ -35,9 +36,11 @@ export const processUpdate = async (event) => {
         
         const authResult = await processAuthenticate(event["headers"]["Authorization"]);
         
-        if(!authResult.result) {
-            return {statusCode: 401, body: {result: false, error: "Unauthorized request!"}};
+        if(!authResult.result || !authResult.admin) {
+          return {statusCode: 401, body: {result: false, error: "Unauthorized request!"}};
         }
+
+        const userId = authResult.userId;
         
     //}
     
@@ -49,16 +52,19 @@ export const processUpdate = async (event) => {
         name = JSON.parse(event.body).name.trim();
     } catch (e) {
       const response = {statusCode: 400, body: { result: false, error: "Malformed body!"}};
+      processAddLog(userId, 'update', event, response, response.statusCode)
       return response;
     }
     
     if(id == null || id == "" || id.length < 3) {
       const response = {statusCode: 400, body: {result: false, error: "Id not valid!"}}
+      processAddLog(userId, 'update', event, response, response.statusCode)
       return response;
     }
     
     if(name == null || name == "" || name.length < 3) {
       const response = {statusCode: 400, body: {result: false, error: "Name not valid!"}}
+      processAddLog(userId, 'update', event, response, response.statusCode)
       return response;
     }
     
@@ -82,6 +88,7 @@ export const processUpdate = async (event) => {
     
     if(resultGet.Item == null) {
         const response = {statusCode: 404, body: {result: false, error: "Record does not exist!"}}
+        processAddLog(userId, 'update', event, response, response.statusCode)
         return response;
     }
     
@@ -115,6 +122,7 @@ export const processUpdate = async (event) => {
     console.log(resultUpdate)
     
     const response = {statusCode: 200, body: {result: true}};
+    processAddLog(userId, 'update', event, response, response.statusCode)
     return response;
     
 

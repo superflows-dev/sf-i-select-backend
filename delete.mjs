@@ -1,7 +1,8 @@
-import { TABLE, AUTH_ENABLE, AUTH_REGION, AUTH_API, AUTH_STAGE, ddbClient, ScanCommand, PutItemCommand, GetItemCommand, UpdateItemCommand, DeleteItemCommand } from "./globals.mjs";
+import { TABLE, SEARCH_ENDPOINT, AUTH_ENABLE, AUTH_REGION, AUTH_API, AUTH_STAGE, ddbClient, ScanCommand, PutItemCommand, GetItemCommand, UpdateItemCommand, DeleteItemCommand } from "./globals.mjs";
 import { processAuthenticate } from './authenticate.mjs';
 import { newUuidV4 } from './newuuid.mjs';
 import { processAddLog } from './addlog.mjs';
+import { processSearchName } from './searchname.mjs';
 
 export const processDelete = async (event) => {
     
@@ -82,6 +83,20 @@ export const processDelete = async (event) => {
         const response = {statusCode: 404, body: {result: false, error: "Record does not exist!"}}
         processAddLog(userId, 'delete', event, response, response.statusCode)
         return response;
+    }
+
+    if(SEARCH_ENDPOINT.length > 0) {
+
+        const searchResult = await processSearchName(resultGet.Item.name);
+        
+        if(searchResult.hits.found > 0) {
+        
+            const response = {statusCode: 409, body: {result: false, error: "Item used elsewhere! Can't delete (" + searchResult.hits.found + ")"}}
+            processAddLog(userId, 'delete', event, response, response.statusCode)
+            return response;
+        
+        }
+
     }
     
     var deleteParams = {

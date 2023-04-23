@@ -91,7 +91,7 @@ export const processDelete = async (event) => {
         
         if(searchResult.hits.found > 0) {
         
-            const response = {statusCode: 409, body: {result: false, error: "Item used elsewhere! Can't delete (" + searchResult.hits.found + ")"}}
+            const response = {statusCode: 409, body: {result: false, error: "Can't delete because this item is used elsewhere. Found " + searchResult.hits.found + " uses. "}}
             processAddLog(userId, 'delete', event, response, response.statusCode)
             return response;
         

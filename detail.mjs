@@ -8,37 +8,37 @@ export const processDetail = async (event) => {
     
     // if(AUTH_ENABLE) {
     
-    //     if((event["headers"]["Authorization"]) == null) {
-    //         return {statusCode: 400, body: { result: false, error: "Malformed headers!"}};
-    //     }
+        if((event["headers"]["Authorization"]) == null) {
+            return {statusCode: 400, body: { result: false, error: "Malformed headers!"}};
+        }
         
-    //     if((event["headers"]["Authorization"].split(" ")[1]) == null) {
-    //         return {statusCode: 400, body: { result: false, error: "Malformed headers!"}};
-    //     }
+        if((event["headers"]["Authorization"].split(" ")[1]) == null) {
+            return {statusCode: 400, body: { result: false, error: "Malformed headers!"}};
+        }
         
-    //     var hAscii = Buffer.from((event["headers"]["Authorization"].split(" ")[1] + ""), 'base64').toString('ascii');
+        var hAscii = Buffer.from((event["headers"]["Authorization"].split(" ")[1] + ""), 'base64').toString('ascii');
         
-    //     if(hAscii.split(":")[1] == null) {
-    //         return {statusCode: 400, body: { result: false, error: "Malformed headers!"}};
-    //     }
+        if(hAscii.split(":")[1] == null) {
+            return {statusCode: 400, body: { result: false, error: "Malformed headers!"}};
+        }
         
-    //     const email = hAscii.split(":")[0];
-    //     const accessToken = hAscii.split(":")[1];
+        const email = hAscii.split(":")[0];
+        const accessToken = hAscii.split(":")[1];
         
-    //     if(email == "" || !email.match(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/)) {
-    //         return {statusCode: 400, body: {result: false, error: "Malformed headers!"}}
-    //     }
+        if(email == "" || !email.match(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/)) {
+            return {statusCode: 400, body: {result: false, error: "Malformed headers!"}}
+        }
         
-    //     if(accessToken.length < 5) {
-    //         return {statusCode: 400, body: {result: false, error: "Malformed headers!"}}
-    //     }
+        if(accessToken.length < 5) {
+            return {statusCode: 400, body: {result: false, error: "Malformed headers!"}}
+        }
         
-    //     const authResult = await processAuthenticate(event["headers"]["Authorization"]);
+        const authResult = await processAuthenticate(event["headers"]["Authorization"]);
         
-    //     if(!authResult.result) {
-    //         return {statusCode: 401, body: {result: false, error: "Unauthorized request!"}};
-    //     }
-        
+        if(!authResult.result) {
+            return {statusCode: 401, body: {result: false, error: "Unauthorized request!"}};
+        }
+
     // }
     
     var id = "";

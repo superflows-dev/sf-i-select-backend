@@ -36,7 +36,7 @@ export const processCreate = async (event) => {
         
         const authResult = await processAuthenticate(event["headers"]["Authorization"]);
         
-        if(!authResult.result || !authResult.admin) {
+        if(!authResult.result && !authResult.admin) {
             return {statusCode: 401, body: {result: false, error: "Unauthorized request!"}};
         }
 

@@ -1,4 +1,4 @@
-import { TABLE, AUTH_ENABLE, AUTH_REGION, AUTH_API, AUTH_STAGE, ddbClient, ScanCommand, PutItemCommand, GetItemCommand, UpdateItemCommand } from "./globals.mjs";
+import { TABLE, AUTH_ENABLE, ddbClient, ScanCommand, PutItemCommand, GetItemCommand, UpdateItemCommand } from "./globals.mjs";
 import { processAuthenticate } from './authenticate.mjs';
 import { newUuidV4 } from './newuuid.mjs';
 

@@ -1,4 +1,4 @@
-import { TABLE, LOG_TABLE, PRESERVE_LOGS_DAYS, AUTH_ENABLE, AUTH_REGION, AUTH_API, AUTH_STAGE, ddbClient, ScanCommand, DeleteItemCommand, PutItemCommand, GetItemCommand, UpdateItemCommand } from "./globals.mjs";
+import { TABLE, LOG_TABLE, PRESERVE_LOGS_DAYS, AUTH_ENABLE, ddbClient, ScanCommand, DeleteItemCommand, PutItemCommand, GetItemCommand, UpdateItemCommand } from "./globals.mjs";
 
 export const processClearLog = async () => {
     

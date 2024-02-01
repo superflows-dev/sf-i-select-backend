@@ -1,22 +1,19 @@
 import https from 'https';
-import { AUTH_REGION, AUTH_API, AUTH_STAGE } from "./globals.mjs";
 
 export const processAuthenticate = async (authorization) => {
   
   let myPromise = new Promise(function(resolve, reject) {
     
     var options = {
-       host: AUTH_API + '.execute-api.' + AUTH_REGION + '.amazonaws.com',
+       host: process.env.AUTH_API + '.execute-api.' + process.env.AUTH_REGION + '.amazonaws.com',
        port: 443,
        method: 'POST',
-       path: '/' + AUTH_STAGE + '/validate',
+       path: '/' + process.env.AUTH_STAGE + '/validate',
        headers: {
           'Authorization': authorization
        }   
     };
     
-    console.log('auth options', options);
-      
     //this is the call
     var request = https.get(options, function(response){
       let data = '';

@@ -10,7 +10,7 @@ const LOG_TABLE = "DB_LOG_TABLE_NAME";
 
 const AUTH_ENABLE = AWS_ENABLE_AUTH;
 
-const SEARCH_ENDPOINT_HOST = "AWS_SEARCH_ENDPOINT_HOST.execute-api.us-east-1.amazonaws.com";
+const SEARCH_ENDPOINT_HOST = "AWS_SEARCH_ENDPOINT.execute-api.us-east-1.amazonaws.com";
 const SEARCH_ENDPOINT_PATH = "/test";
 
 const PRESERVE_LOGS_DAYS = 3;

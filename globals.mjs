@@ -8,7 +8,7 @@ const ddbClient = new DynamoDBClient({ region: REGION });
 const TABLE = "DB_TABLE_NAME";
 const LOG_TABLE = "DB_LOG_TABLE_NAME";
 
-const AUTH_ENABLE = true;
+const AUTH_ENABLE = AWS_ENABLE_AUTH;
 
 const SEARCH_ENDPOINT_HOST = "AWS_SEARCH_ENDPOINT_HOST.execute-api.us-east-1.amazonaws.com";
 const SEARCH_ENDPOINT_PATH = "/test";

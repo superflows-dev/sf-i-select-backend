@@ -1,17 +1,16 @@
+import { SEARCH_ENDPOINT_HOST, SEARCH_ENDPOINT_PATH, REGION, TABLE, CloudSearchDomainClient, SearchCommand } from "./globals.mjs";
+
 import https from 'https';
 
-export const processAuthenticate = async (authorization) => {
+export const processSearchNameApi = async (searchString) => { 
   
   let myPromise = new Promise(function(resolve, reject) {
     
     var options = {
-       host: process.env.AUTH_API + '.execute-api.' + process.env.AUTH_REGION + '.amazonaws.com',
+       host: SEARCH_ENDPOINT_HOST,
        port: 443,
-       method: 'POST',
-       path: '/' + process.env.AUTH_STAGE + '/validate',
-       headers: {
-          'Authorization': authorization
-       }   
+       method: 'GET',
+       path: SEARCH_ENDPOINT_PATH + '?q=' + encodeURIComponent(searchString),
     };
     
     console.log(options);
@@ -41,4 +40,4 @@ export const processAuthenticate = async (authorization) => {
   
   return myPromise;
 
-}
+} 

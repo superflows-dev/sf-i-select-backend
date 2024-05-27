@@ -10,7 +10,8 @@ const LOG_TABLE = "DB_LOG_TABLE_NAME";
 
 const AUTH_ENABLE = AWS_ENABLE_AUTH;
 
-const SEARCH_ENDPOINT = "AWS_SEARCH_ENDPOINT";
+const SEARCH_ENDPOINT_HOST = "AWS_SEARCH_ENDPOINT_HOST.execute-api.us-east-1.amazonaws.com";
+const SEARCH_ENDPOINT_PATH = "/test";
 
 const PRESERVE_LOGS_DAYS = 3;
 
@@ -29,5 +30,6 @@ export {
     CloudSearchDomainClient,
     UploadDocumentsCommand,
     SearchCommand,
-    SEARCH_ENDPOINT
+    SEARCH_ENDPOINT_HOST,
+    SEARCH_ENDPOINT_PATH
 };

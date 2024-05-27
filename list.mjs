@@ -18,6 +18,7 @@ export const processList = async (event) => {
         
         var hAscii = Buffer.from((event["headers"]["Authorization"].split(" ")[1] + ""), 'base64').toString('ascii');
         
+        
         if(hAscii.split(":")[1] == null) {
             return {statusCode: 400, body: { result: false, error: "Malformed headers!"}};
         }
@@ -48,10 +49,13 @@ export const processList = async (event) => {
     }
     
     var resultItems = []
+    
+    console.log(scanParams);
   
     async function ddbQuery () {
         try {
             const data = await ddbClient.send (new ScanCommand(scanParams));
+            console.log(data);
             resultItems = resultItems.concat((data.Items))
             if(data.LastEvaluatedKey != null) {
                 scanParams.ExclusiveStartKey = data.LastEvaluatedKey;
@@ -64,6 +68,8 @@ export const processList = async (event) => {
     };
     
     const resultQ = await ddbQuery();
+    
+    // console.log(resultQ);
     
     // unmarshall the records
   
@@ -80,5 +86,4 @@ export const processList = async (event) => {
     const response = {statusCode: 200, body: {result: true, data: {values: unmarshalledItems}}};
     return response;
     
-
 }

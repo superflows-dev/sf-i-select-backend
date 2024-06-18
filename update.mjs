@@ -49,10 +49,12 @@ export const processUpdate = async (event) => {
     
     var id = "";
     var name = "";
+    var disablechange = "";
     
     try {
         id = JSON.parse(event.body).id.trim();
         name = JSON.parse(event.body).name.trim();
+        disablechange = JSON.parse(event.body).disablechange;
     } catch (e) {
       const response = {statusCode: 400, body: { result: false, error: "Malformed body!"}};
       processAddLog(userId, 'update', event, response, response.statusCode)
@@ -69,6 +71,12 @@ export const processUpdate = async (event) => {
       const response = {statusCode: 400, body: {result: false, error: "Name not valid!"}}
       processAddLog(userId, 'update', event, response, response.statusCode)
       return response;
+    }
+
+    var disableChangeManagement = false;
+
+    if(disablechange != null && disablechange) {
+      disableChangeManagement = true;
     }
     
     var getParams = {
@@ -124,14 +132,16 @@ export const processUpdate = async (event) => {
     
     var resultUpdate = await ddbUpdate();
     
-    await processManageChange(event["headers"]["Authorization"], 
-        { 
-            changedEntity: ENTITY_NAME,
-            changedEntityId: id,
-            changedEntityOldName: oldName.S,
-            changedEntityNewName: name
-        }
-    );
+    if(!disableChangeManagement) {
+      await processManageChange(event["headers"]["Authorization"], 
+          { 
+              changedEntity: ENTITY_NAME,
+              changedEntityId: id,
+              changedEntityOldName: oldName.S,
+              changedEntityNewName: name
+          }
+      );
+    }
     
     console.log(resultUpdate)
     

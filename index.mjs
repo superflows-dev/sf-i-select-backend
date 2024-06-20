@@ -18,12 +18,15 @@ export const handler = async (event, context, callback) => {
       },
     };
     
-    if(event["httpMethod"] == "OPTIONS") {
-      callback(null, response);
-      return;
+    var path = "";
+    
+    if(event["path"] != null) {
+      path = event["path"];
+    } else {
+      path = event["rawPath"];
     }
     
-    switch(event["path"]) {
+    switch(path) {
       
         case "/create":
           const resultCreate = await processCreate(event);

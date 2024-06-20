@@ -18,7 +18,12 @@ export const handler = async (event, context, callback) => {
       },
     };
     
-    var path = "";
+    if(event["httpMethod"] == "OPTIONS") {
+      callback(null, response);
+      return;
+    }
+    
+    var path = ""; 
     
     if(event["path"] != null) {
       path = event["path"];

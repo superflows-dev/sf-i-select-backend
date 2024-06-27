@@ -23,12 +23,31 @@ export const handler = async (event, context, callback) => {
       return;
     }
     
-    var path = ""; 
+    if(event["requestContext"] != null) {
+      if(event["requestContext"]["http"] != null) {
+        if(event["requestContext"]["http"]["method"] != null) {
+          if(event["requestContext"]["http"]["method"] == "OPTIONS") {
+            callback(null, response);
+            return;
+          }
+        }
+      }
+    }
+    
+    var path = "";
     
     if(event["path"] != null) {
       path = event["path"];
     } else {
       path = event["rawPath"];
+    }
+    
+    if(event["headers"] != null) {
+      if(event["headers"]["authorization"] != null) {
+        event["headers"]["Authorization"] = event["headers"]["authorization"]
+      } else if(event["headers"]["Authorization"] != null) {
+        event["headers"]["authorization"] = event["headers"]["Authorization"]
+      }
     }
     
     switch(path) {

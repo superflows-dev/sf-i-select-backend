@@ -12,8 +12,8 @@ const AUTH_ENABLE = AWS_ENABLE_AUTH;
 
 const ENTITY_NAME = "ENTITY_NAME_VALUE";
 
-const CHANGE_ENDPOINT_HOST = "AWS_CHANGE_ENDPOINT.execute-api.us-east-1.amazonaws.com";
-const CHANGE_ENDPOINT_PATH = "/test/startjob";
+const CHANGE_ENDPOINT_HOST = "AWS_CHANGE_ENDPOINT.lambda-url.us-east-1.on.aws";
+const CHANGE_ENDPOINT_PATH = "/startjob";
 
 const SEARCH_ENDPOINT_HOST = "AWS_SEARCH_ENDPOINT.execute-api.us-east-1.amazonaws.com";
 const SEARCH_ENDPOINT_PATH = "/test";

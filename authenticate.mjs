@@ -3,12 +3,12 @@ import https from 'https';
 export const processAuthenticate = async (authorization) => {
   
   let myPromise = new Promise(function(resolve, reject) {
-    
+
     var options = {
-       host: process.env.AUTH_API + '.execute-api.' + process.env.AUTH_REGION + '.amazonaws.com',
+       host: process.env.AUTH_API + '.lambda-url.' + process.env.AUTH_REGION + '.on.aws',
        port: 443,
        method: 'POST',
-       path: '/' + process.env.AUTH_STAGE + '/validate',
+       path: '/validate',
        headers: {
           'Authorization': authorization
        }   

@@ -3,6 +3,7 @@ import { processList } from './list.mjs';
 import { processDetail } from './detail.mjs';
 import { processUpdate } from './update.mjs';
 import { processDelete } from './delete.mjs';
+import { ENTITY_NAME } from './globals.mjs';
 
 export const handler = async (event, context, callback) => {
     
@@ -52,6 +53,7 @@ export const handler = async (event, context, callback) => {
     
     switch(path) {
       
+        case "/"+ENTITY_NAME+"/create":
         case "/create":
           const resultCreate = await processCreate(event);
           response.body = JSON.stringify(resultCreate.body);
@@ -59,24 +61,28 @@ export const handler = async (event, context, callback) => {
           response.statusCode = resultCreate.statusCode;
         break;
         
+        case "/"+ENTITY_NAME+"/list":
         case "/list":
           const resultList = await processList(event);
           response.body = JSON.stringify(resultList.body);
           response.statusCode = resultList.statusCode;
         break;
         
+        case "/"+ENTITY_NAME+"/detail":
         case "/detail":
           const resultDetail = await processDetail(event);
           response.body = JSON.stringify(resultDetail.body);
           response.statusCode = resultDetail.statusCode;
         break;
         
+        case "/"+ENTITY_NAME+"/update":
         case "/update":
           const resultUpdate = await processUpdate(event);
           response.body = JSON.stringify(resultUpdate.body);
           response.statusCode = resultUpdate.statusCode;
         break;
         
+        case "/"+ENTITY_NAME+"/delete":
         case "/delete":
           const resultDelete = await processDelete(event);
           response.body = JSON.stringify(resultDelete.body);

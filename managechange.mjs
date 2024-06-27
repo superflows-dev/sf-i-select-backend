@@ -12,7 +12,8 @@ export const processManageChange = async (authorization, body) => {
       method: 'POST',
       path: CHANGE_ENDPOINT_PATH,
       headers: {
-          'Authorization': authorization
+          'Authorization': authorization,
+          'Content-type': 'application/json'
       }
     };
     

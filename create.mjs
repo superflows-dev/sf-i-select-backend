@@ -53,7 +53,7 @@ export const processCreate = async (event) => {
       return response;
     }
     
-    if(name == null || name == "" || name.length < 3) {
+    if(name == null || name == "" || name.length < 2) {
       const response = {statusCode: 400, body: {result: false, error: "Name not valid!"}}
       processAddLog(userId, 'create', event, response, response.statusCode)
       return response;

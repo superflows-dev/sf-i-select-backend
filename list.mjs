@@ -1,4 +1,5 @@
-import { TABLE, AUTH_ENABLE, ddbClient, ScanCommand, PutItemCommand } from "./globals.mjs";
+import { TABLE, ddbClient, ScanCommand, PutItemCommand } from "./globals.mjs";
+import { AUTH_ENABLE, ENTITY_NAME, GetObjectCommand, S3_BUCKET_NAME, s3Client, S3_DB_FILE_KEY, PutObjectCommand } from "./globals.mjs";
 import { processAuthenticate } from './authenticate.mjs';
 import { newUuidV4 } from './newuuid.mjs';
 
@@ -42,47 +43,33 @@ export const processList = async (event) => {
         
     // }
     
-    // scan records
-  
-    var scanParams = {
-        TableName: TABLE,
-    }
+    var command = new GetObjectCommand({
+        Bucket: S3_BUCKET_NAME,
+        Key: S3_DB_FILE_KEY,
+    });
     
-    var resultItems = []
+    var jsonData = {};
     
-    console.log(scanParams);
-  
-    async function ddbQuery () {
-        try {
-            const data = await ddbClient.send (new ScanCommand(scanParams));
-            console.log(data);
-            resultItems = resultItems.concat((data.Items))
-            if(data.LastEvaluatedKey != null) {
-                scanParams.ExclusiveStartKey = data.LastEvaluatedKey;
-                await ddbQuery();
-            }
-        } catch (err) {
-            console.log(err);
-            return err;
+    try {
+        const response = await s3Client.send(command);
+        const s3ResponseStream = response.Body;
+        const chunks = []
+        for await (const chunk of s3ResponseStream) {
+            chunks.push(chunk)
         }
-    };
-    
-    const resultQ = await ddbQuery();
-    
-    // console.log(resultQ);
-    
-    // unmarshall the records
-  
+        const responseBuffer = Buffer.concat(chunks)
+        jsonData = JSON.parse(responseBuffer.toString());
+    } catch (err) {
+        console.log("db read",err); 
+    } 
     var unmarshalledItems = [];
-  
-    for(var i = 0; i < resultItems.length; i++) {
-        var item = {};
-        for(var j = 0; j < Object.keys(resultItems[i]).length; j++) {
-            item[Object.keys(resultItems[i])[j]] = resultItems[i][Object.keys(resultItems[i])[j]][Object.keys(resultItems[i][Object.keys(resultItems[i])[j]])[0]];
+    for(let key of Object.keys(jsonData)){
+        let item = {'id':key}
+        for(let subkey of Object.keys(jsonData[key])){
+            item[subkey] = jsonData[key][subkey]
         }
         unmarshalledItems.push(item);
     }
-    
     const response = {statusCode: 200, body: {result: true, data: {values: unmarshalledItems}}};
     return response;
     

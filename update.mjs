@@ -1,4 +1,5 @@
-import { TABLE, AUTH_ENABLE, ddbClient, ScanCommand, PutItemCommand, GetItemCommand, UpdateItemCommand, ENTITY_NAME } from "./globals.mjs";
+// import { TABLE, ddbClient, ScanCommand, PutItemCommand, GetItemCommand, UpdateItemCommand } from "./globals.mjs";
+import { AUTH_ENABLE, ENTITY_NAME, GetObjectCommand, S3_BUCKET_NAME, s3Client, S3_DB_FILE_KEY, PutObjectCommand } from "./globals.mjs";
 import { processAuthenticate } from './authenticate.mjs';
 import { processManageChange } from './managechange.mjs';
 import { newUuidV4 } from './newuuid.mjs';
@@ -67,7 +68,7 @@ export const processUpdate = async (event) => {
       return response;
     }
     
-    if(name == null || name == "" || name.length < 2) {
+    if(name == null || name == "" || name.length < 3) {
       const response = {statusCode: 400, body: {result: false, error: "Name not valid!"}}
       processAddLog(userId, 'update', event, response, response.statusCode)
       return response;
@@ -79,58 +80,47 @@ export const processUpdate = async (event) => {
       disableChangeManagement = true;
     }
     
-    var getParams = {
-        TableName: TABLE,
-        Key: {
-          id: { S: id },
-        },
-    };
+    var command = new GetObjectCommand({
+        Bucket: S3_BUCKET_NAME,
+        Key: S3_DB_FILE_KEY,
+    });
     
-    async function ddbGet () {
-        try {
-          const data = await ddbClient.send(new GetItemCommand(getParams));
-          return data;
-        } catch (err) {
-          return err;
+    var jsonData = {};
+    
+    try {
+        const response = await s3Client.send(command);
+        const s3ResponseStream = response.Body;
+        const chunks = []
+        for await (const chunk of s3ResponseStream) {
+            chunks.push(chunk)
         }
-    };
+        const responseBuffer = Buffer.concat(chunks)
+        jsonData = JSON.parse(responseBuffer.toString());
+    } catch (err) {
+        console.log("db read",err); 
+    } 
     
-    var resultGet = await ddbGet();
-    
-    if(resultGet.Item == null) {
+    if(jsonData[id] == null) {
         const response = {statusCode: 404, body: {result: false, error: "Record does not exist!"}}
         processAddLog(userId, 'update', event, response, response.statusCode)
         return response;
     }
     
-    var oldName = resultGet.Item.name;
+    var oldName = jsonData[id].name;
+    jsonData[id].name = name;
     
-    var updateParams = {
-        TableName: TABLE,
-        Key: {
-          id: { S: id },
-        },
-        UpdateExpression: "set #name1 = :name1",
-        ExpressionAttributeValues: {
-            ":name1": { S: name },
-        },
-        ExpressionAttributeNames: {
-            "#name1": "name",
-        }
-    };
-
-    console.log(updateParams)
+    command = new PutObjectCommand({
+        Bucket: S3_BUCKET_NAME,
+        Key: S3_DB_FILE_KEY,
+        Body: JSON.stringify(jsonData),
+        ContentType: 'application/json'
+    });
     
-    const ddbUpdate = async () => {
-        try {
-          const data = await ddbClient.send(new UpdateItemCommand(updateParams));
-          return data;
-        } catch (err) {
-          return err;
-        }
-    };
-    
-    var resultUpdate = await ddbUpdate();
+    try {
+        await s3Client.send(command);
+    } catch (err) {
+        console.log("update error",err);
+    }
     
     if(!disableChangeManagement) {
       await processManageChange(event["headers"]["Authorization"], 
@@ -143,12 +133,10 @@ export const processUpdate = async (event) => {
       );
     }
     
-    console.log(resultUpdate)
-    
     
     const response = {statusCode: 200, body: {result: true}};
     processAddLog(userId, 'update', event, response, response.statusCode)
     return response;
-    
+  
 
 }

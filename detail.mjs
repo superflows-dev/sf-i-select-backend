@@ -1,4 +1,5 @@
-import { TABLE, AUTH_ENABLE, ddbClient, ScanCommand, PutItemCommand, GetItemCommand, UpdateItemCommand } from "./globals.mjs";
+// import { TABLE, AUTH_ENABLE, ddbClient, ScanCommand, PutItemCommand, GetItemCommand, UpdateItemCommand } from "./globals.mjs";
+import { AUTH_ENABLE, ENTITY_NAME, GetObjectCommand, S3_BUCKET_NAME, s3Client, S3_DB_FILE_KEY, PutObjectCommand } from "./globals.mjs";
 import { processAuthenticate } from './authenticate.mjs';
 import { newUuidV4 } from './newuuid.mjs';
 
@@ -55,33 +56,35 @@ export const processDetail = async (event) => {
       return response;
     }
     
-    var getParams = {
-        TableName: TABLE,
-        Key: {
-          id: { S: id },
-        },
-    };
+    var command = new GetObjectCommand({
+        Bucket: S3_BUCKET_NAME,
+        Key: S3_DB_FILE_KEY,
+    });
     
-    async function ddbGet () {
-        try {
-          const data = await ddbClient.send(new GetItemCommand(getParams));
-          return data;
-        } catch (err) {
-          return err;
+    var jsonData = {};
+    
+    try {
+        const response = await s3Client.send(command);
+        const s3ResponseStream = response.Body;
+        const chunks = []
+        for await (const chunk of s3ResponseStream) {
+            chunks.push(chunk)
         }
-    };
-    
-    var resultGet = await ddbGet();
-    
-    if(resultGet.Item == null) {
-        const response = {statusCode: 404, body: {result: false, error: "Record does not exist!"}}
-        return response;
+        const responseBuffer = Buffer.concat(chunks)
+        jsonData = JSON.parse(responseBuffer.toString());
+    } catch (err) {
+        console.log("db read",err); 
     }
     
     
     var unmarshalledItem = {};
-    for(var i = 0; i < Object.keys(resultGet.Item).length; i++) {
-        unmarshalledItem[Object.keys(resultGet.Item)[i]] = resultGet.Item[Object.keys(resultGet.Item)[i]][Object.keys(resultGet.Item[Object.keys(resultGet.Item)[i]])[0]];
+    for(let key of Object.keys(jsonData)){
+        if(key == id){
+        unmarshalledItem['id'] = key
+            for(let subkey of Object.keys(jsonData[key])){
+                unmarshalledItem[subkey] = jsonData[key][subkey]
+            }
+        }
     }
     
     const response = {statusCode: 200, body: {result: true, data: {value: unmarshalledItem}}};

@@ -4,6 +4,7 @@ import { processDetail } from './detail.mjs';
 import { processUpdate } from './update.mjs';
 import { processDelete } from './delete.mjs';
 import { ENTITY_NAME } from './globals.mjs';
+import { processMoveFromDb } from './movefromdb.mjs'
 
 export const handler = async (event, context, callback) => {
     
@@ -87,6 +88,10 @@ export const handler = async (event, context, callback) => {
           const resultDelete = await processDelete(event);
           response.body = JSON.stringify(resultDelete.body);
           response.statusCode = resultDelete.statusCode;
+        break;
+        
+        case "/movefromdb":
+          await processMoveFromDb();
         break;
         
     }

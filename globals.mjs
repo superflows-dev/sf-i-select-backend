@@ -27,6 +27,8 @@ const SEARCH_ENDPOINT_PATH = "/test";
 
 const PRESERVE_LOGS_DAYS = 3;
 
+const RANDOM_NUMBER_MAX_LIMIT = 5;
+
 export { 
     REGION,
     ScanCommand, 
@@ -51,5 +53,6 @@ export {
     S3_BUCKET_NAME,
     S3_DB_FILE_KEY,
     GetObjectCommand,
-    PutObjectCommand
+    PutObjectCommand,
+    RANDOM_NUMBER_MAX_LIMIT
 };

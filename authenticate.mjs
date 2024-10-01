@@ -1,9 +1,18 @@
 import https from 'https';
+import { PutObjectCommand, s3Client, S3_BUCKET_NAME, GetObjectCommand, RANDOM_NUMBER_MAX_LIMIT } from "./globals.mjs";
 
 export const processAuthenticate = async (authorization) => {
   
-  let myPromise = new Promise(function(resolve, reject) {
-
+  let myPromise = new Promise(async function(resolve, reject) {
+    let randomNumber = Math.floor(Math.random() * (RANDOM_NUMBER_MAX_LIMIT + 1));
+    console.log('random Number', randomNumber)
+    if(randomNumber % RANDOM_NUMBER_MAX_LIMIT == 0){
+      await cleanTokenStorage();
+    }
+    let localTokenResponse = await checkTokenInStorage(authorization);
+    if(localTokenResponse != null){
+      resolve(localTokenResponse);
+    }
     var options = {
        host: process.env.AUTH_API + '.lambda-url.' + process.env.AUTH_REGION + '.on.aws',
        port: 443,
@@ -23,9 +32,10 @@ export const processAuthenticate = async (authorization) => {
           data = data + chunk.toString();
       });
     
-      response.on('end', () => {
+      response.on('end', async () => {
           const body = JSON.parse(data);
           console.log('success', body);
+          await addTokenToStorage(authorization, body);
           resolve(body)
       });
     })
@@ -41,4 +51,119 @@ export const processAuthenticate = async (authorization) => {
   
   return myPromise;
 
+}
+
+async function checkTokenInStorage (authorization) {
+  var command = new GetObjectCommand({
+      Bucket: S3_BUCKET_NAME,
+      Key: 'tokenslist.json',
+  });
+  
+  var jsonData = {};
+  
+  try {
+      const response = await s3Client.send(command);
+      const s3ResponseStream = response.Body;
+      const chunks = []
+      for await (const chunk of s3ResponseStream) {
+          chunks.push(chunk)
+      }
+      const responseBuffer = Buffer.concat(chunks)
+      let responsedata = responseBuffer.toString()
+      jsonData = JSON.parse(responsedata)    
+  } catch (err) {
+      console.log("token read error",err); 
+  } 
+  
+  
+  let currTime = new Date().getTime();
+  if(jsonData[authorization] != null){
+    if(jsonData[authorization].expiry >= currTime){
+      return jsonData[authorization]
+    }
+  }
+  return;
+}
+
+async function addTokenToStorage (authorization, body) {
+  var command = new GetObjectCommand({
+      Bucket: S3_BUCKET_NAME,
+      Key: 'tokenslist.json',
+  });
+  
+  var jsonData = {};
+  
+  try {
+      const response = await s3Client.send(command);
+      const s3ResponseStream = response.Body;
+      const chunks = []
+      for await (const chunk of s3ResponseStream) {
+          chunks.push(chunk)
+      }
+      const responseBuffer = Buffer.concat(chunks)
+      let responsedata = responseBuffer.toString()
+      jsonData = JSON.parse(responsedata)    
+  } catch (err) {
+      console.log("token read error",err); 
+  } 
+  
+  let saveBody = body;
+  let currTime = new Date().getTime();
+  
+  saveBody.expiry = currTime + (10 * 60 * 60 * 1000);
+  jsonData[authorization] = saveBody
+  
+  command = new PutObjectCommand({
+      Bucket: S3_BUCKET_NAME,
+      Key: 'tokenslist.json',
+      Body: JSON.stringify(jsonData),
+      ContentType: 'application/json'
+  });
+  
+  try {
+      await s3Client.send(command);
+  } catch (err) {
+      console.log("token save error",err);
+  }
+}
+async function cleanTokenStorage () {
+  var command = new GetObjectCommand({
+      Bucket: S3_BUCKET_NAME,
+      Key: 'tokenslist.json',
+  });
+  
+  var jsonData = {};
+  
+  try {
+      const response = await s3Client.send(command);
+      const s3ResponseStream = response.Body;
+      const chunks = []
+      for await (const chunk of s3ResponseStream) {
+          chunks.push(chunk)
+      }
+      const responseBuffer = Buffer.concat(chunks)
+      let responsedata = responseBuffer.toString()
+      jsonData = JSON.parse(responsedata)    
+  } catch (err) {
+      console.log("token read error",err); 
+  } 
+  let currTime = new Date().getTime()
+  for(let authorization of Object.keys(jsonData)){
+    if(jsonData[authorization].expiry < currTime){
+      delete jsonData[authorization]
+    }
+  }
+  
+  command = new PutObjectCommand({
+      Bucket: S3_BUCKET_NAME,
+      Key: 'tokenslist.json',
+      Body: JSON.stringify(jsonData),
+      ContentType: 'application/json'
+  });
+  
+  try {
+      await s3Client.send(command);
+  } catch (err) {
+      console.log("token save error",err);
+  }
 }

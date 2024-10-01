@@ -27,7 +27,7 @@ const SEARCH_ENDPOINT_PATH = "/test";
 
 const PRESERVE_LOGS_DAYS = 3;
 
-const RANDOM_NUMBER_MAX_LIMIT = 5;
+const RANDOM_NUMBER_MAX_LIMIT = 20;
 
 export { 
     REGION,

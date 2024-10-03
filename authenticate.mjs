@@ -110,7 +110,7 @@ async function addTokenToStorage (authorization, body) {
   let saveBody = body;
   let currTime = new Date().getTime();
   
-  saveBody.expiry = currTime + (30 * 60 * 1000);
+  saveBody.expiry = currTime + (24 * 60 * 60 * 1000);
   jsonData[authorization] = saveBody
   
   command = new PutObjectCommand({

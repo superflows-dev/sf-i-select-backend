@@ -12,6 +12,7 @@ export const processAuthenticate = async (authorization) => {
     let localTokenResponse = await checkTokenInStorage(authorization);
     if(localTokenResponse != null){
       resolve(localTokenResponse);
+      return;
     }
     var options = {
        host: process.env.AUTH_API + '.lambda-url.' + process.env.AUTH_REGION + '.on.aws',

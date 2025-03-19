@@ -20,7 +20,8 @@ export const processAuthenticate = async (authorization) => {
        method: 'POST',
        path: '/validate',
        headers: {
-          'Authorization': authorization
+          'Authorization': authorization,
+          'x-lambda-key': process.env.LAMBDA_KEY
        }   
     };
     
